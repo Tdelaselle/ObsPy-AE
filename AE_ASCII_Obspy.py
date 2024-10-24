@@ -18,7 +18,7 @@ Dependencies:
     - tqdm
 
 Usage:
-    python AE_Obspy.py -data <data_directory> -save <save_directory> -f <export_format> -files <file_range> -d <start_date> -ch <channels> -sampling <sampling_rates> -sensors <sensors_references> -head <header_size> -col <number_of_columns>
+    python AE_ASCII_Obspy.py -data <data_directory> -save <save_directory> -f <export_format> -files <file_range> -d <start_date> -ch <channels> -sampling <sampling_rates> -sensors <sensors_references> -head <header_size> -col <number_of_columns> -n <output_name>
 
 Arguments:
     -data, --datapath: str
@@ -41,12 +41,14 @@ Arguments:
         Number of lines in the header of the TXT files. Default is 13.
     -col, --columns: int
         Number of columns in txt files (1 or 2). Default: 1
+    -n, --name: str
+    	Resulting file name. Default: "current".
         
 
-Example:
-    python3 AE_Obspy.py -data ./data/ -save ./output/ -f mseed -files 0 5 -d 2023-01-01T00:00:00.000 -ch 1 2 -sampling 2 5 -sensors nano30 micro200 -head 13 -col 1
+Examples:
+    python3 AE_ASCII_Obspy.py -data ./data/ -save ./output/ -f mseed -files 0 5 -d 2023-01-01T00:00:00.000 -ch 1 2 -sampling 2 5 -sensors nano30 micro200 -head 13 -col 1 -n Obspy_stream
 
-    python3 AE_Obspy.py -data ./Raw_data/C6C7SD_5083_2.3_S1/ -save ./data/ -f pkl -files 0 5 -d 2023-01-01T00:00:00.000 -ch 2 -sampling 2 -sensors nano30 -head 13 -col 1 -n C6C7SD_5083_2.3_S1_ch2 
+    python3 AE_ASCII_Obspy.py -data ./test_2ch/ -save ./ -f mseed -files 0 3 -d 2023-01-01T00:00:00.000 -ch 1 2 -sampling 2 5 -sensors nano30 micro200 -head 13 -col 1 -n test_ch2_Obspy
 
 
     Made by Théotime de la Selle in August 2024.

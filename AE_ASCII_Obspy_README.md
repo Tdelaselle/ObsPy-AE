@@ -15,9 +15,9 @@ AE_Obspy requires the following python libraires:
 
 ## Usage and example
 
- python3 AE_Obspy.py -data <data_directory> -save <save_directory> -f <export_format> -files <file_range> -d <start_date> -ch <channels> -sampling <sampling_rates> -sensors <sensors_references> -head <header_size> -col <number_of_columns>
+ python3 AE_ASCII_Obspy.py -data <data_directory> -save <save_directory> -f <export_format> -files <file_range> -d <start_date> -ch <channels> -sampling <sampling_rates> -sensors <sensors_references> -head <header_size> -col <number_of_columns> -n <output_name>
   
-    python3 AE_Obspy.py -data ./test_2ch/ -save ./ -f mseed -files 0 3 -d 2023-01-01T00:00:00.000 -ch 1 2 -sampling 2 5 -sensors nano30 micro200 -head 13 -col 1
+    python3 AE_ASCII_Obspy.py -data ./test_2ch/ -save ./ -f mseed -files 0 3 -d 2023-01-01T00:00:00.000 -ch 1 2 -sampling 2 5 -sensors nano30 micro200 -head 13 -col 1 -n test_ch2_Obspy
 
 ## Arguments
 -data, --datapath: str
@@ -50,6 +50,8 @@ Number of lines in the header of the TXT files. Default is 13.
 -col, --columns: int
 Number of columns in txt files (1 or 2). Default: 1
   
+-n, --name: str
+Resulting file name. Default: "current".
 
 
 > __Copyright ©️ 2024 Théotime de la Selle__
