@@ -1,8 +1,8 @@
 """
-Script for Converting Acoustic Emission Datastreaming (TXT) to Obspy Stream saved in MSEED format or serialized with pickle.
+Script for Converting Acoustic Emission Datastreaming (TDMS) to Obspy Stream saved in MSEED format or serialized with pickle.
 
 Description:
-    This script processes acoustic emission data stored in TXT files and converts it into an Obspy stream format (either PKL or MSEED). It uses command-line arguments to specify various parameters including data file paths, export formats, and sensor configurations.
+    This script processes acoustic emission data stored in TDMS files and converts it into an Obspy stream format (either PKL or MSEED). It uses command-line arguments to specify various parameters including data file paths, export formats, and sensor configurations.
     From Obspy documentation: 
     "ObsPy is an open-source project dedicated to provide a Python framework for processing seismological data. It provides [...] seismological signal processing routines which allow the manipulation of seismological time series (see [Beyreuther2010], [Megies2011], [Krischer2015]). The goal of the ObsPy project is to facilitate rapid application development for seismology."
 
@@ -11,11 +11,11 @@ Description:
 
 Dependencies:
     - argparse
-    - glob
     - pickle
     - numpy
     - obspy
     - tqdm
+    - nptdms
 
 Usage:
     python AE_Obspy.py -data <data_directory> -save <save_directory> -f <export_format> -files <file_range> -d <start_date> -ch <channels> -sampling <sampling_rates> -sensors <sensors_references> -head <header_size> -col <number_of_columns>
@@ -53,13 +53,12 @@ Example:
 """
 
 import argparse
-import glob
 import pickle
 import os
 
 import numpy as np
 import obspy
-import tqdm
+import nptdms
 
 # Argument parser
 parser = argparse.ArgumentParser(
@@ -80,28 +79,6 @@ parser.add_argument(
     default="",
 )
 parser.add_argument(
-    "-f",
-    "--format",
-    help="format of exported stream (pkl or mseed). Default: mseed.",
-    type=str,
-    default="mseed",
-)
-parser.add_argument(
-    "-files",
-    "--filesindex",
-    nargs='+',
-    help="First and last files to load (ex: 0 10). No value: all files are loaded.",
-    type=int,
-    default=(0,0),
-)
-parser.add_argument(
-    "-d",
-    "--date",
-    help="Starting time of the stream. Follow format: 'YYYY-MM-DDTHH:mm:ss.sss'",
-    type=str,
-    default="1900-01-01T00:00:00.000",
-)
-parser.add_argument(
     "-ch",
     "--channels",
     nargs='+',
@@ -110,34 +87,18 @@ parser.add_argument(
     default=[1],
 )
 parser.add_argument(
-    "-sampling",
-    "--sampling",
-    nargs='+',
-    help='List of integers containing sampling frequencies (MHz) for each channel (ex: 2 5 2). Default: 2',
-    type=int,
-    default=[2],
-)
-parser.add_argument(
-    "-sensors",
-    "--sensors",
-    nargs='+',
-    help='List of strings containing sensors references for each channel (ex: nano30 micro200). Default: -',
+    "-f",
+    "--format",
+    help="format of exported stream (pkl or mseed). Default: mseed.",
     type=str,
-    default=["-"]
+    default="mseed",
 )
 parser.add_argument(
-    "-head",
-    "--header_size",
-    help='Number of lines in header of txt files. Default: 13',
-    type=int,
-    default=13,
-)
-parser.add_argument(
-    "-col",
-    "--columns",
-    help='Number of columns in txt files (1 or 2). Default: 1',
-    type=int,
-    default=1,
+    "-d",
+    "--date",
+    help="Starting time of the stream. Follow format: 'YYYY-MM-DDTHH:mm:ss.sss'",
+    type=str,
+    default="1900-01-01T00:00:00.000",
 )
 parser.add_argument(
     "-n",
@@ -150,52 +111,43 @@ parser.add_argument(
 # Parse arguments
 ARGUMENTS = parser.parse_args()
 
-def load_txt_into_stream(
-    dirpath, stream, sampling_rate, Channel, starttime, sensor
+def load_tdms_into_stream(
+    dirpath, starttime,channels
 ):    
     
-    print(f"Loading data of channel",Channel)
+    print(f"Loading data of ",dirpath)
 
-    # Get list of files
-    # ------- /!\ Datastreaming files must have their channel number specified in their names through the form "_N_" (anywhere in the file name)
-    filepaths = list(filter(os.path.isfile, glob.glob(dirpath + "*" + "_" + Channel + "_*")))
-    filepaths.sort(key=lambda x: os.path.getmtime(x))
-    if ARGUMENTS.filesindex[0] != ARGUMENTS.filesindex[1] :
-        filepaths = filepaths[ARGUMENTS.filesindex[0]:ARGUMENTS.filesindex[1]]
-          
-    # Collect data
-    data = list()
-    for filepath in tqdm.tqdm(filepaths):
-        if ARGUMENTS.columns == 1:
-            # /!\ Encoding may need to be changed ('latin-1' if accents in files, even in the header) 
-            data.append(np.loadtxt(filepath, skiprows=ARGUMENTS.header_size,encoding='latin-1'))  # for 1 column files 
-        else :  
-            data.append(np.loadtxt(filepath, delimiter=',', usecols=(1), skiprows=ARGUMENTS.header_size))    # for 2 columns files
-
-    # Get numpy array
-    data = np.hstack(data)
-    n_samples = data.shape[0]
-
-    # Obspy stream header definition
-    header = {
-        "sampling_rate": sampling_rate,
-        "npts": n_samples,
-        "starttime": starttime,
-        "delta": 1.0 / sampling_rate,
-        "network": "AE",
-        "station": "streaming",
-        "location": sensor,
-        "channel": Channel,
-    }
-
-    stream.append(obspy.Trace(data=data, header=header))
+    # Create Obspy stream
+    stream = obspy.core.Stream()
+    
+    # Collect data, information and add Trace to stream for each channel
+    with nptdms.TdmsFile.open(dirpath) as tdms_file:
+        group_name = "Transient"
+        for ch in channels:
+            channel_name = "Ch"+str(ch)
+            channel = tdms_file[group_name][channel_name]
+            data = channel[:]
+            times = channel.time_track()
+        
+            sampling = 1/(times[1]-times[0])
+            
+            header = {
+                "sampling_rate": sampling,
+                "npts": len(data),
+                "starttime": starttime,
+                "delta": 1.0 / sampling,
+                "network": "AE_stream",
+                "station": "Galling",
+                "location": "",
+                "channel": channel_name,
+            }
+            
+            stream.append(obspy.Trace(data=data, header=header))
 
     return stream
 
 # Loop over all channels to add traces in stream
-stream = obspy.Stream()
-for i in range (len(ARGUMENTS.channels)):
-    stream = load_txt_into_stream(ARGUMENTS.datapath,stream,ARGUMENTS.sampling[i]*1e6,str(ARGUMENTS.channels[i]),obspy.UTCDateTime(ARGUMENTS.date),ARGUMENTS.sensors[i])
+stream = load_tdms_into_stream(ARGUMENTS.datapath,obspy.UTCDateTime(ARGUMENTS.date),ARGUMENTS.channels)
 
 # Control stream 
 print(stream)
