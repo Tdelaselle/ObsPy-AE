@@ -1,5 +1,5 @@
 
-# Welcome to the __AE-Obspy__ repository
+# Welcome to the __ObsPy Acoustic Emission__ repository
 
 <div>
 Script for Converting Acoustic Emission Datastreaming to Obspy stream for signal processing, plotting and facilitate rapid application development.
@@ -10,7 +10,7 @@ Script for Converting Acoustic Emission Datastreaming to Obspy stream for signal
 
 ## About
 
-This script processes acoustic emission data stored in TXT files and converts it into an Obspy stream format, saved in mseed format or serialized with pickle. It uses command-line arguments to specify various parameters including data file paths, export formats, and sensor configurations.
+This script processes acoustic emission data stored in _txt_ or _tdms_ files and converts it into an ObsPy stream format, saved in mseed format or serialized with pickle. It uses command-line arguments to specify various parameters including data file paths, export formats, and sensor configurations.
     
 From Obspy documentation: 
     
