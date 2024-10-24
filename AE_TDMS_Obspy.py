@@ -18,7 +18,7 @@ Dependencies:
     - nptdms
 
 Usage:
-    python AE_Obspy.py -data <data_directory> -save <save_directory> -f <export_format> -files <file_range> -d <start_date> -ch <channels> -sampling <sampling_rates> -sensors <sensors_references> -head <header_size> -col <number_of_columns>
+    python AE_TDMS_Obspy.py -data <data_directory> -save <save_directory> -f <export_format> -d <start_date> -ch <channels> -n <output_name>
 
 Arguments:
     -data, --datapath: str
@@ -27,26 +27,16 @@ Arguments:
         Filepath to save the Obspy stream. Default is an empty string.
     -f, --format: str
         Format of the exported stream (either 'pkl' or 'mseed'). Default is 'mseed'.
-    -files, --filesindex: tuple (first, last)
-        Indices of the first and last files to load. If not specified, all files are loaded.
     -d, --date: str
         Starting time of the stream in 'YYYY-MM-DDTHH:mm:ss.sss' format. Default is '1900-01-01T00:00:00.000'.
     -ch, --channels: list of int
         List of channel numbers. Default is [1].
-    -sampling, --sampling: list of int
-        List of sampling frequencies (in MHz) for each channel. Default is [2].
-    -sensors, --sensors: list of str
-        List of sensor references for each channel. Default is ["-"].
-    -head, --header_size: int
-        Number of lines in the header of the TXT files. Default is 13.
-    -col, --columns: int
-        Number of columns in txt files (1 or 2). Default: 1
+    -n, --name: str
+    	Resulting file name. Default: "current". Default is "current".
         
 
 Example:
-    python3 AE_Obspy.py -data ./data/ -save ./output/ -f mseed -files 0 5 -d 2023-01-01T00:00:00.000 -ch 1 2 -sampling 2 5 -sensors nano30 micro200 -head 13 -col 1
-
-    python3 AE_Obspy.py -data ./Raw_data/C6C7SD_5083_2.3_S1/ -save ./data/ -f pkl -files 0 5 -d 2023-01-01T00:00:00.000 -ch 2 -sampling 2 -sensors nano30 -head 13 -col 1 -n C6C7SD_5083_2.3_S1_ch2 
+    python3 AE_TDMS_Obspy.py -data ./data/ -save ./output/ -f mseed -d 2023-01-01T00:00:00.000 -ch 1 2 -n Obspy_stream_TEST
 
 
     Made by Théotime de la Selle in August 2024.
@@ -62,7 +52,7 @@ import nptdms
 
 # Argument parser
 parser = argparse.ArgumentParser(
-    description="Convert acoustic emission datastreaming (txt) to Obspy stream (pkl or mseed)"
+    description="Convert acoustic emission datastreaming (tdms) to Obspy stream (pkl or mseed)"
 )
 parser.add_argument(
     "-data",
