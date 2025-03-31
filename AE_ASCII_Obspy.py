@@ -172,7 +172,7 @@ def load_txt_into_stream(
             # /!\ Encoding may need to be changed ('latin-1' if accents in files, even in the header) 
             data.append(np.loadtxt(filepath, skiprows=ARGUMENTS.header_size,encoding='latin-1'))  # for 1 column files 
         else :  
-            data.append(np.loadtxt(filepath, delimiter=',', usecols=(1), skiprows=ARGUMENTS.header_size))    # for 2 columns files
+            data.append(np.loadtxt(filepath, delimiter=',', usecols=(1), skiprows=ARGUMENTS.header_size,encoding='latin-1'))    # for 2 columns files
 
     # Get numpy array
     data = np.hstack(data)

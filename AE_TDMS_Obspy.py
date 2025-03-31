@@ -32,7 +32,7 @@ Arguments:
     -ch, --channels: list of int
         List of channel numbers. Default is [1].
     -n, --name: str
-    	Resulting file name. Default: "current".
+    	Resulting file name. Default: "current". Default is "current".
         
 
 Example:
