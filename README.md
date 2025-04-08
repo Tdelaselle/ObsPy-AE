@@ -2,7 +2,7 @@
 # Welcome to the __ObsPy Acoustic Emission__ repository
 
 <div>
-Script for Converting Acoustic Emission Datastreaming to Obspy stream for signal processing, plotting and facilitate rapid application development.
+Scripts for Converting and processing Acoustic Emission continuous recordings to Obspy stream for signal processing, plotting and facilitate rapid application development.
 
 <div>
   
